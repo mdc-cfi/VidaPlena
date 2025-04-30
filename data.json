@@ -1,0 +1,152 @@
+[
+  {
+    "id": "client1",
+    "nombre": "Juan Pérez",
+    "edad": 75,
+    "direccion": "Calle de la Juventud 123, Ciudad de México",
+    "telefono": "555-1234567",
+    "contactoEmergencia": {
+      "nombre": "María Pérez",
+      "relacion": "Hija",
+      "telefono": "555-7654321"
+    },
+    "historialMedico": {
+      "condiciones": ["Hipertensión", "Diabetes"],
+      "notas": "Control de glucosa semanal. Revisión médica trimestral."
+    },
+    "recordatoriosMedicamentos": [
+      {
+        "nombreMedicamento": "Metformina",
+        "dosis": "500mg",
+        "frecuencia": "2 veces al día"
+      }
+    ],
+    "agendaCitas": [
+      {
+        "fecha": "2025-05-10",
+        "tipo": "Revisión general",
+        "descripcion": "Consulta médica anual"
+      }
+    ]
+  },
+  {
+    "id": "client2",
+    "nombre": "Ana Gómez",
+    "edad": 82,
+    "direccion": "Av. Las Palmas 456, Monterrey",
+    "telefono": "555-2345678",
+    "contactoEmergencia": {
+      "nombre": "Carlos Gómez",
+      "relacion": "Hijo",
+      "telefono": "555-8765432"
+    },
+    "historialMedico": {
+      "condiciones": ["Artritis"],
+      "notas": "Se requiere fisioterapia semanal."
+    },
+    "recordatoriosMedicamentos": [
+      {
+        "nombreMedicamento": "Ibuprofeno",
+        "dosis": "200mg",
+        "frecuencia": "Cada 8 horas en caso de dolor"
+      }
+    ],
+    "agendaCitas": [
+      {
+        "fecha": "2025-06-15",
+        "tipo": "Control de dolor",
+        "descripcion": "Evaluación con especialista en reumatología"
+      }
+    ]
+  },
+  {
+    "id": "client3",
+    "nombre": "Luis Martínez",
+    "edad": 78,
+    "direccion": "Calle Siempre Viva 789, Guadalajara",
+    "telefono": "555-3456789",
+    "contactoEmergencia": {
+      "nombre": "Lucía Martínez",
+      "relacion": "Esposa",
+      "telefono": "555-9876543"
+    },
+    "historialMedico": {
+      "condiciones": ["Colesterol alto"],
+      "notas": "Dieta especial y chequeos mensuales."
+    },
+    "recordatoriosMedicamentos": [
+      {
+        "nombreMedicamento": "Atorvastatina",
+        "dosis": "10mg",
+        "frecuencia": "Diaria"
+      }
+    ],
+    "agendaCitas": [
+      {
+        "fecha": "2025-07-20",
+        "tipo": "Chequeo cardiológico",
+        "descripcion": "Monitoreo de colesterol y presión arterial"
+      }
+    ]
+  },
+  {
+    "id": "client4",
+    "nombre": "Marta Sánchez",
+    "edad": 80,
+    "direccion": "Boulevard Central 101, Sevilla",
+    "telefono": "555-4567890",
+    "contactoEmergencia": {
+      "nombre": "José Sánchez",
+      "relacion": "Hijo",
+      "telefono": "555-6543210"
+    },
+    "historialMedico": {
+      "condiciones": ["Osteoporosis"],
+      "notas": "Seguimiento con suplemento de calcio y vitamina D."
+    },
+    "recordatoriosMedicamentos": [
+      {
+        "nombreMedicamento": "Calcio D3",
+        "dosis": "600mg",
+        "frecuencia": "Diaria"
+      }
+    ],
+    "agendaCitas": [
+      {
+        "fecha": "2025-08-05",
+        "tipo": "Control de osteoporosis",
+        "descripcion": "Revisión con especialista en huesos"
+      }
+    ]
+  },
+  {
+    "id": "client5",
+    "nombre": "Carmen Ruiz",
+    "edad": 77,
+    "direccion": "Paseo de los Olivos 202, Valencia",
+    "telefono": "555-5678901",
+    "contactoEmergencia": {
+      "nombre": "Pedro Ruiz",
+      "relacion": "Esposo",
+      "telefono": "555-5432109"
+    },
+    "historialMedico": {
+      "condiciones": ["Asma"],
+      "notas": "Uso de inhalador según necesidad; revisión pulmonar semestral."
+    },
+    "recordatoriosMedicamentos": [
+      {
+        "nombreMedicamento": "Inhalador",
+        "dosis": "Según prescripción",
+        "frecuencia": "En caso de dificultad respiratoria"
+      }
+    ],
+    "agendaCitas": [
+      {
+        "fecha": "2025-09-12",
+        "tipo": "Consulta pulmonar",
+        "descripcion": "Control de función respiratoria"
+      }
+    ]
+  }
+]
