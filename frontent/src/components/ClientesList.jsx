@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "../firebase.config";
+import { sendEmergencyAlert } from "../utils/emergencyUtils"; // Importar función para alertas de emergencia
 
 const ClientesList = () => {
   // Estado para almacenar la lista de clientes
@@ -12,24 +13,25 @@ const ClientesList = () => {
   // Estado para manejar el término de búsqueda
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Función para obtener los clientes desde Firestore
-  const fetchClientes = async () => {
-    try {
-      const querySnapshot = await getDocs(collection(db, "clientes"));
-      const clientesArray = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setClientes(clientesArray); // Actualiza el estado con los clientes obtenidos
-    } catch (error) {
-      console.error("Error al obtener clientes:", error); // Manejo de errores
-    } finally {
-      setLoading(false); // Finaliza el indicador de carga
-    }
-  };
-
   // Hook para cargar los clientes al montar el componente
   useEffect(() => {
+    const fetchClientes = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "clientes"));
+        const clientesFirestore = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        // Guardar los clientes en localStorage para sincronización
+        localStorage.setItem("clientes", JSON.stringify(clientesFirestore));
+        setClientes(clientesFirestore);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error al obtener clientes desde Firestore:", error);
+      }
+    };
+
     fetchClientes();
   }, []);
 
@@ -41,6 +43,19 @@ const ClientesList = () => {
         setClientes((prev) => prev.filter((cliente) => cliente.id !== id)); // Actualiza el estado
       } catch (error) {
         console.error("Error al eliminar cliente:", error); // Manejo de errores
+      }
+    }
+  };
+
+  // Función para manejar la alerta de emergencia
+  const handleEmergencia = (cliente) => {
+    if (window.confirm(`¿Enviar alerta de emergencia para ${cliente.nombre}?`)) {
+      try {
+        sendEmergencyAlert(cliente);
+        alert("Alerta de emergencia enviada con éxito.");
+      } catch (error) {
+        console.error("Error al enviar alerta de emergencia:", error);
+        alert("Hubo un error al enviar la alerta de emergencia.");
       }
     }
   };
@@ -147,6 +162,21 @@ const ClientesList = () => {
                       }}
                     >
                       Eliminar
+                    </button>
+                    {/* Botón para enviar alerta de emergencia */}
+                    <button
+                      onClick={() => handleEmergencia(cliente)}
+                      style={{
+                        backgroundColor: "#ffc107",
+                        color: "black",
+                        border: "none",
+                        borderRadius: "5px",
+                        cursor: "pointer",
+                        padding: "5px 10px",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Emergencia
                     </button>
                   </div>
                 </header>
