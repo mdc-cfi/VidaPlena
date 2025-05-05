@@ -1,24 +1,31 @@
-import { Link } from "react-router-dom";
+import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { getAuth, signOut } from "firebase/auth";
-
-function handleLogout() {
-  const auth = getAuth();
-  signOut(auth)
-    .then(() => {
-      console.log("Sesión cerrada exitosamente");
-      window.location.href = "/login"; // Redirigir al login
-    })
-    .catch((error) => {
-      console.error("Error al cerrar sesión:", error);
-    });
-}
+import { useAuthState } from "react-firebase-hooks/auth";
+import logo from "../imagenes/logo.png";
 
 function Navbar() {
+  const auth = getAuth();
+  const [user] = useAuthState(auth);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    signOut(auth)
+      .then(() => {
+        console.log("Sesión cerrada exitosamente");
+        navigate("/login"); // Redirigir al login
+      })
+      .catch((error) => {
+        console.error("Error al cerrar sesión:", error);
+      });
+  };
+
   return (
     <nav className="navbar navbar-expand-lg" style={{ backgroundColor: '#495057', borderRadius: '10px', width: '90%', margin: '10px auto' }}>
       <div className="container">
-        <Link className="navbar-brand text-white" to="/admin-dashboard">
-          VidaPlena 
+        <Link className="navbar-brand text-white" to="/admin-dashboard" style={{ display: "flex", alignItems: "center" }}>
+          <img src={logo} alt="Logo Vida Plena" style={{ width: "50px", height: "50px", marginRight: "10px" }} />
+          VidaPlena
         </Link>
         <button
           className="navbar-toggler"
@@ -38,21 +45,31 @@ function Navbar() {
                 Inicio
               </Link>
             </li>
-            <li className="nav-item">
-              <Link className="nav-link text-white" to="/clientes">
-                Clientes
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link text-white" to="/clientes/agregar">
-                Agregar Cliente
-              </Link>
-            </li>
-            <li className="nav-item">
-              <button className="nav-link text-white btn btn-link" onClick={handleLogout}>
-                Cerrar Sesión
-              </button>
-            </li>
+            {user ? (
+              <>
+                <li className="nav-item">
+                  <span className="nav-link text-white">{user.displayName || "Usuario"}</span>
+                </li>
+                <li className="nav-item">
+                  <button className="nav-link text-white btn btn-link" onClick={handleLogout}>
+                    Cerrar Sesión
+                  </button>
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link text-white" to="/login">
+                    Iniciar Sesión
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link text-white" to="/register">
+                    Crear Cuenta
+                  </Link>
+                </li>
+              </>
+            )}
           </ul>
         </div>
       </div>
