@@ -4,23 +4,33 @@ import { db } from "../firebase.config.js";
 
 const UserDashboard = ({ userId }) => {
   const [userData, setUserData] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!userId) {
+      setError("ID de usuario no válido.");
+      return;
+    }
+
     const fetchUserData = async () => {
       try {
         const userDoc = await getDoc(doc(db, "clientes", userId));
         if (userDoc.exists()) {
           setUserData(userDoc.data());
         } else {
-          console.error("No se encontró información del usuario.");
+          setError("No se encontró información del usuario.");
         }
       } catch (error) {
-        console.error("Error al obtener la información del usuario:", error);
+        setError("Error al obtener la información del usuario: " + error.message);
       }
     };
 
     fetchUserData();
   }, [userId]);
+
+  if (error) {
+    return <p>Error: {error}</p>;
+  }
 
   if (!userData) {
     return <p>Cargando información...</p>;

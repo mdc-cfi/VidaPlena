@@ -4,7 +4,7 @@ import { getAuth, signOut } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import logo from "../imagenes/logo.png";
 
-function Navbar() {
+function Navbar({ role }) {
   const auth = getAuth();
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
@@ -45,6 +45,27 @@ function Navbar() {
                 Inicio
               </Link>
             </li>
+            {role === "admin" && (
+              <>
+                <li className="nav-item">
+                  <Link className="nav-link text-white" to="/clientes">
+                    Clientes
+                  </Link>
+                </li>
+                <li className="nav-item">
+                  <Link className="nav-link text-white" to="/clientes/agregar">
+                    Agregar Cliente
+                  </Link>
+                </li>
+              </>
+            )}
+            {role === "user" && (
+              <li className="nav-item">
+                <Link className="nav-link text-white" to="/user-dashboard">
+                  Mi Dashboard
+                </Link>
+              </li>
+            )}
             {user ? (
               <>
                 <li className="nav-item">

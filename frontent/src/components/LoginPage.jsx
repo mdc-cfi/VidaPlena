@@ -22,17 +22,29 @@ const LoginPage = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Obtener el rol del usuario desde Firestore
-      const userDoc = await getDoc(doc(db, "users", user.uid));
+      console.log("UID del usuario autenticado:", user.uid);
+
+      // Verificar en ambas colecciones: administradores y users
+      let userDoc = await getDoc(doc(db, "administradores", user.uid));
       if (!userDoc.exists()) {
+        userDoc = await getDoc(doc(db, "users", user.uid));
+      }
+
+      if (!userDoc.exists()) {
+        console.error("No se encontró el documento del usuario en las colecciones 'administradores' o 'users'.");
         setError("No se encontró información del usuario. Por favor, contacte al administrador.");
         return;
       }
 
       const userData = userDoc.data();
+      console.log("Datos del usuario obtenidos de Firestore:", userData);
+
+      // Redirigir según el rol del usuario
       if (userData.role === "admin") {
+        console.log("Usuario identificado como administrador. Redirigiendo al dashboard de administrador.");
         navigate("/admin-dashboard");
       } else {
+        console.log("Usuario identificado como estándar. Redirigiendo al dashboard de usuario.");
         navigate("/user-dashboard");
       }
     } catch (error) {

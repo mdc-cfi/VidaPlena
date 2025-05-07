@@ -1,19 +1,41 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import HomePage from "./components/HomePage";
 import RegisterPage from "./components/RegisterPage";
 import Dashboard from "./components/Dashboard";
 import UserDashboard from "./components/UserDashboard";
 import ClientesList from "./components/ClientesList";
 import AgregarCliente from "./components/AgregarCliente";
-import Navbar from "./components/navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoginPage from "./components/LoginPage";
+import AddClientInfo from "./components/AddClientInfo";
 
 const AppRoutes = () => {
+  const [role, setRole] = useState(null);
+  const auth = getAuth();
+  const db = getFirestore();
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        let userDoc = await getDoc(doc(db, "administradores", user.uid));
+        if (!userDoc.exists()) {
+          userDoc = await getDoc(doc(db, "users", user.uid));
+        }
+        if (userDoc.exists()) {
+          setRole(userDoc.data().role);
+        }
+      } else {
+        setRole(null);
+      }
+    });
+    return () => unsubscribe();
+  }, [auth, db]);
+
   return (
     <Router>
-      <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -21,7 +43,7 @@ const AppRoutes = () => {
         <Route
           path="/admin-dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="admin">
               <Dashboard />
             </ProtectedRoute>
           }
@@ -29,7 +51,7 @@ const AppRoutes = () => {
         <Route
           path="/user-dashboard"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="user">
               <UserDashboard />
             </ProtectedRoute>
           }
@@ -50,6 +72,7 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
+        <Route path="/add-client-info/:userId" element={<AddClientInfo />} />
       </Routes>
     </Router>
   );

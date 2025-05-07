@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "../firebase.config"; // Usar la instancia inicializada de Firestore
+import { useNavigate } from "react-router-dom";
 
 const RegisterPage = () => {
   const [name, setName] = useState("");
@@ -8,6 +11,8 @@ const RegisterPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -24,10 +29,18 @@ const RegisterPage = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Enviar correo de verificación
-      await sendEmailVerification(user);
+      // Crear un documento en Firestore para el usuario registrado
+      await setDoc(doc(db, "clientes", user.uid), {
+        name: name,
+        email: email,
+        role: "user", // Rol predeterminado
+        verified: true, // Estado de verificación
+      });
 
-      setMessage("Registro exitoso. Por favor, verifica tu correo electrónico.");
+      setMessage("Registro exitoso. Redirigiendo para completar información adicional...");
+      setTimeout(() => {
+        navigate(`/add-client-info/${user.uid}`);
+      }, 2000);
     } catch (error) {
       if (error.code === "auth/email-already-in-use") {
         setMessage("El correo ya está registrado. Por favor, utiliza otro correo.");
