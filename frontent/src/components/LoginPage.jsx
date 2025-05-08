@@ -1,10 +1,8 @@
-import React, { useState } from "react";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
-import { auth } from "../firebase.config";
+import React, { useState, useEffect } from "react";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../firebase.config";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth"; // Importar la función faltante
-
-const db = getFirestore(); // Inicializar Firestore
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -12,41 +10,49 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const adminDoc = await getDoc(doc(db, "administradores", user.uid));
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+
+        if (adminDoc.exists()) {
+          navigate("/admin-dashboard");
+        } else if (userDoc.exists()) {
+          navigate("/user-dashboard");
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
-
-    console.log("Iniciando sesión con:", email);
-    console.log("Conectando a Firebase Authentication...");
 
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      console.log("UID del usuario autenticado:", user.uid);
-
-      // Verificar en ambas colecciones: administradores y users
-      let userDoc = await getDoc(doc(db, "administradores", user.uid));
-      if (!userDoc.exists()) {
-        userDoc = await getDoc(doc(db, "users", user.uid));
-      }
-
-      if (!userDoc.exists()) {
-        console.error("No se encontró el documento del usuario en las colecciones 'administradores' o 'users'.");
-        setError("No se encontró información del usuario. Por favor, contacte al administrador.");
+      // Verificar primero en la colección administradores
+      const adminDoc = await getDoc(doc(db, "administradores", user.uid));
+      if (adminDoc.exists() && adminDoc.data().role === "admin") {
+        console.log("Usuario identificado como administrador.");
+        navigate("/admin-dashboard");
         return;
       }
 
-      const userData = userDoc.data();
-      console.log("Datos del usuario obtenidos de Firestore:", userData);
-
-      // Redirigir según el rol del usuario
-      if (userData.role === "admin") {
-        console.log("Usuario identificado como administrador. Redirigiendo al dashboard de administrador.");
-        navigate("/admin-dashboard");
-      } else {
-        console.log("Usuario identificado como estándar. Redirigiendo al dashboard de usuario.");
+      // Verificar en la colección clientes para usuarios con rol "user"
+      const clientDoc = await getDoc(doc(db, "clientes", user.uid));
+      if (clientDoc.exists() && clientDoc.data().role === "user") {
+        console.log("Usuario identificado como cliente.");
         navigate("/user-dashboard");
+        return;
       }
+
+      console.error("No se encontró información del usuario en Firestore.");
+      setError("No se encontró información del usuario. Por favor, contacte al administrador.");
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       if (error.code === "auth/user-not-found") {

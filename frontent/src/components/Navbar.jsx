@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getAuth, signOut } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -9,11 +9,17 @@ function Navbar({ role }) {
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    console.log("Rol actualizado en Navbar:", role);
+  }, [role]);
+
+  console.log("Rol del usuario en Navbar:", role);
+
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
         console.log("Sesión cerrada exitosamente");
-        navigate("/login"); // Redirigir al login
+        navigate("/"); // Redirigir a la página de inicio
       })
       .catch((error) => {
         console.error("Error al cerrar sesión:", error);
