@@ -3,12 +3,14 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.config.js";
 import Navbar from "./Navbar";
 import { getAuth } from "firebase/auth";
+import { useNavigate } from "react-router-dom";
 
 const UserDashboard = () => {
   const [userData, setUserData] = useState(null);
   const [error, setError] = useState(null);
   const auth = getAuth();
   const user = auth.currentUser;
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!user) {
@@ -49,16 +51,21 @@ const UserDashboard = () => {
           <div className="col-md-6 col-lg-4 mb-4">
             <div className="card">
               <div className="card-body">
-                <h5 className="card-title">Correo Electrónico</h5>
-                <p>{userData.correoElectronico}</p>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-6 col-lg-4 mb-4">
-            <div className="card">
-              <div className="card-body">
                 <h5 className="card-title">Condiciones Médicas</h5>
-                <p>{userData.condicionesMedicas || "No especificado"}</p>
+                <p>En esta sección puedes consultar y gestionar las condiciones médicas registradas, proporcionando un historial detallado.</p>
+                {userData.condicionesMedicas && userData.condicionesMedicas.length > 0 ? (
+                  <ul>
+                    {userData.condicionesMedicas.map((condicion, index) => (
+                      <li key={index}>{condicion}</li>
+                    ))}
+                  </ul>
+                ) : null}
+                <button
+                  className="btn btn-primary mt-3"
+                  onClick={() => navigate('/condiciones-medicas')}
+                >
+                  Ver más
+                </button>
               </div>
             </div>
           </div>
@@ -66,15 +73,20 @@ const UserDashboard = () => {
             <div className="card">
               <div className="card-body">
                 <h5 className="card-title">Medicamentos</h5>
+                <p>En esta sección puedes gestionar y consultar los medicamentos asignados, incluyendo detalles como dosis y frecuencia.</p>
                 {userData.medicamentos && userData.medicamentos.length > 0 ? (
                   <ul>
                     {userData.medicamentos.map((med, index) => (
                       <li key={index}>{med.nombre} - {med.dosis}</li>
                     ))}
                   </ul>
-                ) : (
-                  <p>No hay medicamentos registrados.</p>
-                )}
+                ) : null}
+                <button
+                  className="btn btn-primary mt-3"
+                  onClick={() => navigate('/medicamentos')}
+                >
+                  Ver más
+                </button>
               </div>
             </div>
           </div>

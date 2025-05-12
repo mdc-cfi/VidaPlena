@@ -1,7 +1,10 @@
 import React from 'react';
 import Navbar from "./Navbar";
+import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
+  const navigate = useNavigate();
+
   return (
     <div>
       <Navbar />
@@ -13,7 +16,7 @@ export default function Dashboard() {
               <div className="card-body">
                 <h5 className="card-title">Seguimiento de Salud</h5>
                 <p className="card-text">Registra y visualiza los signos vitales y datos médicos importantes.</p>
-                <button className="btn btn-primary">Ver más</button>
+                <button className="btn btn-primary" onClick={() => navigate('/clientes')}>Ver más</button>
               </div>
             </div>
           </div>
@@ -22,7 +25,7 @@ export default function Dashboard() {
               <div className="card-body">
                 <h5 className="card-title">Recordatorios de Medicamentos</h5>
                 <p className="card-text">Consulta y gestiona los recordatorios de medicamentos.</p>
-                <button className="btn btn-primary">Ver más</button>
+                <button className="btn btn-primary" onClick={() => navigate('/medicamentos')}>Ver más</button>
               </div>
             </div>
           </div>

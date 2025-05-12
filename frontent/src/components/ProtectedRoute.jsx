@@ -41,7 +41,8 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   }
 
   if (!user) {
-    return <Navigate to="/" replace />;
+    console.warn("Usuario no autenticado. Redirigiendo a la página de inicio de sesión.");
+    return <Navigate to="/login" replace />;
   }
 
   if (requiredRole && userRole !== requiredRole) {

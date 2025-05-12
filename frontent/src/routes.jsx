@@ -11,9 +11,10 @@ import AgregarCliente from "./components/AgregarCliente";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoginPage from "./components/LoginPage";
 import AddClientInfo from "./components/AddClientInfo";
+import MedicamentosList from "./components/MedicamentosList";
+import CondicionesMedicas from "./components/CondicionesMedicas";
 
 const AppRoutes = () => {
-  const [role, setRole] = useState(null);
   const auth = getAuth();
   const db = getFirestore();
 
@@ -24,11 +25,6 @@ const AppRoutes = () => {
         if (!userDoc.exists()) {
           userDoc = await getDoc(doc(db, "users", user.uid));
         }
-        if (userDoc.exists()) {
-          setRole(userDoc.data().role);
-        }
-      } else {
-        setRole(null);
       }
     });
     return () => unsubscribe();
@@ -37,7 +33,10 @@ const AppRoutes = () => {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route
+          path="/"
+          element={<HomePage />}
+        />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route
@@ -73,6 +72,22 @@ const AppRoutes = () => {
           }
         />
         <Route path="/add-client-info/:userId" element={<AddClientInfo />} />
+        <Route
+          path="/medicamentos"
+          element={
+            <ProtectedRoute>
+              <MedicamentosList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/condiciones-medicas"
+          element={
+            <ProtectedRoute>
+              <CondicionesMedicas />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );
