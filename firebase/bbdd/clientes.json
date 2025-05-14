@@ -11,7 +11,7 @@
         "telefono": "555-7654321"
       },
       "historialMedico": {
-        "condiciones": ["Hipertensión", "Diabetes"],
+        "condiciones": ["Hipertensión", "Diabetes", "Insuficiencia renal"],
         "notas": "Control de glucosa semanal. Revisión médica trimestral."
       },
       "recordatoriosMedicamentos": [
@@ -41,7 +41,7 @@
         "telefono": "555-8765432"
       },
       "historialMedico": {
-        "condiciones": ["Artritis"],
+        "condiciones": ["Artritis", "Osteoartritis"],
         "notas": "Se requiere fisioterapia semanal."
       },
       "recordatoriosMedicamentos": [
@@ -71,7 +71,7 @@
         "telefono": "555-9876543"
       },
       "historialMedico": {
-        "condiciones": ["Colesterol alto"],
+        "condiciones": ["Colesterol alto", "Hipotiroidismo"],
         "notas": "Dieta especial y chequeos mensuales."
       },
       "recordatoriosMedicamentos": [
@@ -101,7 +101,7 @@
         "telefono": "555-6543210"
       },
       "historialMedico": {
-        "condiciones": ["Osteoporosis"],
+        "condiciones": ["Osteoporosis", "Deficiencia de vitamina D"],
         "notas": "Seguimiento con suplemento de calcio y vitamina D."
       },
       "recordatoriosMedicamentos": [
@@ -131,7 +131,7 @@
         "telefono": "555-5432109"
       },
       "historialMedico": {
-        "condiciones": ["Asma"],
+        "condiciones": ["Asma", "Alergia estacional"],
         "notas": "Uso de inhalador según necesidad; revisión pulmonar semestral."
       },
       "recordatoriosMedicamentos": [
@@ -150,4 +150,3 @@
       ]
     }
   ]
-  

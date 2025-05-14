@@ -1,11 +1,37 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase.config';
 
 const MedicamentosList = () => {
-  const [medicamentos, setMedicamentos] = useState([
-    { id: 1, nombre: 'Paracetamol', dosis: '500mg', frecuencia: 'Cada 8 horas' },
-    { id: 2, nombre: 'Ibuprofeno', dosis: '200mg', frecuencia: 'Cada 12 horas' },
-  ]);
+  const [medicamentos, setMedicamentos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchMedicamentos = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, 'medicamentos'));
+        const medicamentosData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        setMedicamentos(medicamentosData);
+      } catch (err) {
+        console.error('Error al obtener los medicamentos:', err);
+        setError('No se pudo cargar la información de los medicamentos.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMedicamentos();
+  }, []);
+
+  if (loading) {
+    return <p>Cargando medicamentos...</p>;
+  }
+
+  if (error) {
+    return <p>{error}</p>;
+  }
 
   return (
     <>
@@ -17,6 +43,8 @@ const MedicamentosList = () => {
           {medicamentos.map((medicamento) => (
             <li key={medicamento.id} className="list-group-item">
               <strong>{medicamento.nombre}</strong> - {medicamento.dosis} - {medicamento.frecuencia}
+              <br />
+              <em>Cliente:</em> {medicamento.clienteNombre || 'No especificado'}
             </li>
           ))}
         </ul>

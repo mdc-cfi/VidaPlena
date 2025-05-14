@@ -4,7 +4,7 @@ import { getAuth } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.config";
 
-const ProtectedRoute = ({ children, requiredRole }) => {
+const ProtectedRoute = ({ children, requiredRoles = [] }) => {
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const auth = getAuth();
@@ -20,7 +20,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
           } else {
             const clientDoc = await getDoc(doc(db, "clientes", user.uid));
             if (clientDoc.exists()) {
-              setUserRole(clientDoc.data().role);
+              setUserRole(clientDoc.data().role || "user");
             }
           }
         } catch (error) {
@@ -45,8 +45,8 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && userRole !== requiredRole) {
-    console.error(`Acceso denegado: el usuario no tiene el rol requerido (${requiredRole}).`);
+  if (requiredRoles.length > 0 && !requiredRoles.includes(userRole)) {
+    console.error(`Acceso denegado: el usuario no tiene un rol permitido (${requiredRoles.join(", ")}).`);
     return <Navigate to="/" replace />;
   }
 

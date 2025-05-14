@@ -34,7 +34,7 @@ export default function Dashboard() {
               <div className="card-body">
                 <h5 className="card-title">Agenda de Citas</h5>
                 <p className="card-text">Organiza y visualiza las citas médicas programadas.</p>
-                <button className="btn btn-primary">Ver más</button>
+                <button className="btn btn-primary" onClick={() => navigate('/agenda-citas')}>Ver más</button>
               </div>
             </div>
           </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
@@ -13,6 +13,7 @@ import LoginPage from "./components/LoginPage";
 import AddClientInfo from "./components/AddClientInfo";
 import MedicamentosList from "./components/MedicamentosList";
 import CondicionesMedicas from "./components/CondicionesMedicas";
+import AgendaCitas from "./components/AgendaCitas";
 
 const AppRoutes = () => {
   const auth = getAuth();
@@ -85,6 +86,14 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <CondicionesMedicas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/agenda-citas"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AgendaCitas />
             </ProtectedRoute>
           }
         />

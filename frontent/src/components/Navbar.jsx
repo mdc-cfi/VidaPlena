@@ -52,18 +52,11 @@ function Navbar({ role }) {
               </Link>
             </li>
             {role === "admin" && (
-              <>
-                <li className="nav-item">
-                  <Link className="nav-link text-white" to="/clientes">
-                    Clientes
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link text-white" to="/clientes/agregar">
-                    Agregar Cliente
-                  </Link>
-                </li>
-              </>
+              <li className="nav-item">
+                <Link className="nav-link text-white" to="/clientes/agregar">
+                  Agregar Cliente
+                </Link>
+              </li>
             )}
             {role === "user" && (
               <li className="nav-item">
