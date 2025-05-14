@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase.config';
-import Navbar from './Navbar';
 import { getAuth } from 'firebase/auth';
 
 const CondicionesMedicas = () => {
@@ -37,29 +36,21 @@ const CondicionesMedicas = () => {
 
   if (loading) {
     return (
-      <>
-        <Navbar />
-        <div className="container mt-5">
-          <p>Cargando condiciones médicas...</p>
-        </div>
-      </>
+      <div className="container mt-5">
+        <p>Cargando condiciones médicas...</p>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <>
-        <Navbar />
-        <div className="container mt-5">
-          <p>Error: {error}</p>
-        </div>
-      </>
+      <div className="container mt-5">
+        <p>Error: {error}</p>
+      </div>
     );
   }
 
   return (
-    <>
-      <Navbar />
       <div className="container mt-5">
         <h1 className="text-center mb-4">Condiciones Médicas</h1>
         <p className="text-center">Aquí puedes gestionar y consultar las condiciones médicas registradas.</p>
@@ -75,7 +66,6 @@ const CondicionesMedicas = () => {
           <p className="text-center">No hay condiciones médicas registradas para este cliente.</p>
         )}
       </div>
-    </>
   );
 };
 

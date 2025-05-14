@@ -13,8 +13,10 @@ import LoginPage from "./components/LoginPage";
 import AddClientInfo from "./components/AddClientInfo";
 import MedicamentosList from "./components/MedicamentosList";
 import CondicionesMedicas from "./components/CondicionesMedicas";
+import Navbar from "./components/Navbar";
 
 const AppRoutes = () => {
+  const [role, setRole] = useState(null);
   const auth = getAuth();
   const db = getFirestore();
 
@@ -22,9 +24,18 @@ const AppRoutes = () => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         let userDoc = await getDoc(doc(db, "administradores", user.uid));
-        if (!userDoc.exists()) {
-          userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setRole("admin");
+        } else {
+          userDoc = await getDoc(doc(db, "clientes", user.uid));
+          if (userDoc.exists()) {
+            setRole("user");
+          } else {
+            setRole(null);
+          }
         }
+      } else {
+        setRole(null);
       }
     });
     return () => unsubscribe();
@@ -32,6 +43,7 @@ const AppRoutes = () => {
 
   return (
     <Router>
+      <Navbar role={role} />
       <Routes>
         <Route
           path="/"
@@ -58,7 +70,7 @@ const AppRoutes = () => {
         <Route
           path="/clientes"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="admin">
               <ClientesList />
             </ProtectedRoute>
           }
@@ -66,7 +78,7 @@ const AppRoutes = () => {
         <Route
           path="/clientes/agregar"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="admin">
               <AgregarCliente />
             </ProtectedRoute>
           }
@@ -75,7 +87,7 @@ const AppRoutes = () => {
         <Route
           path="/medicamentos"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="admin">
               <MedicamentosList />
             </ProtectedRoute>
           }
@@ -83,7 +95,7 @@ const AppRoutes = () => {
         <Route
           path="/condiciones-medicas"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute requiredRole="admin">
               <CondicionesMedicas />
             </ProtectedRoute>
           }

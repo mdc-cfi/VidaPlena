@@ -148,7 +148,11 @@ const ClientesList = () => {
                   <h4>Apartados Importantes</h4>
                   <p><strong>Teléfono:</strong> {cliente.telefono || "No especificado"}</p>
                   <p><strong>Contacto de Emergencia:</strong> {cliente.contactoEmergencia?.telefono || "No especificado"}</p>
-                  <p><strong>Condiciones Médicas:</strong> {cliente.historialMedico?.condiciones?.join(", ") || "No especificado"}</p>
+                  <p><strong>Condiciones Médicas:</strong> {
+                    Array.isArray(cliente.historialMedico?.condiciones)
+                      ? cliente.historialMedico.condiciones.join(", ")
+                      : (cliente.historialMedico?.condiciones || "No especificado")
+                  }</p>
                 </section>
               )}
             </article>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Navbar from './components/Navbar';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getDoc, doc } from "firebase/firestore";
+import { getDoc, doc, getFirestore } from "firebase/firestore";
 import AdminDashboard from "./components/AdminDashboard";
 import UserDashboard from "./components/UserDashboard";
 
@@ -11,6 +11,7 @@ const App = () => {
 
   useEffect(() => {
     const auth = getAuth();
+    const db = getFirestore(); // <--- Agregado aquí
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         console.log("Usuario autenticado:", user);

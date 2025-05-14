@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.config.js";
-import Navbar from "./Navbar";
 import { getAuth } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
+// Componente principal del dashboard de usuario
 const UserDashboard = () => {
-  const [userData, setUserData] = useState(null);
-  const [error, setError] = useState(null);
-  const auth = getAuth();
-  const user = auth.currentUser;
-  const navigate = useNavigate();
+  const [userData, setUserData] = useState(null); // Estado para los datos del usuario
+  const [error, setError] = useState(null); // Estado para errores
+  const auth = getAuth(); // Instancia de autenticación
+  const user = auth.currentUser; // Usuario autenticado
+  const navigate = useNavigate(); // Hook de navegación
 
+  // Efecto para obtener los datos del usuario al montar el componente
   useEffect(() => {
     if (!user) {
       setError("ID de usuario no válido.");
@@ -35,19 +36,23 @@ const UserDashboard = () => {
   }, [user]);
 
   if (error) {
+    // Muestra mensaje de error si ocurre
     return <p>Error: {error}</p>;
   }
 
   if (!userData) {
+    // Muestra mensaje de carga mientras se obtienen los datos
     return <p>Cargando información...</p>;
   }
 
   return (
     <div>
-      <Navbar />
+      {/* Contenedor principal del dashboard de usuario */}
       <div className="container mt-5">
+        {/* Título de bienvenida personalizado */}
         <h1 className="text-center mb-4">Bienvenido, {userData.nombreCompleto}</h1>
         <div className="row">
+          {/* Tarjeta de Condiciones Médicas */}
           <div className="col-md-6 col-lg-4 mb-4">
             <div className="card">
               <div className="card-body">
@@ -60,6 +65,7 @@ const UserDashboard = () => {
                     ))}
                   </ul>
                 ) : null}
+                {/* Botón para ver más */}
                 <button
                   className="btn btn-primary mt-3"
                   onClick={() => navigate('/condiciones-medicas')}
@@ -69,6 +75,7 @@ const UserDashboard = () => {
               </div>
             </div>
           </div>
+          {/* Tarjeta de Medicamentos */}
           <div className="col-md-6 col-lg-4 mb-4">
             <div className="card">
               <div className="card-body">
@@ -81,6 +88,7 @@ const UserDashboard = () => {
                     ))}
                   </ul>
                 ) : null}
+                {/* Botón para ver más */}
                 <button
                   className="btn btn-primary mt-3"
                   onClick={() => navigate('/medicamentos')}

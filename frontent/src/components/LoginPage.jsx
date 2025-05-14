@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase.config";
 import { useNavigate } from "react-router-dom";
@@ -10,23 +10,37 @@ const LoginPage = () => {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
+  // Redirigir si ya está autenticado, pero solo si está en /login
   useEffect(() => {
-    const auth = getAuth();
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      if (user && window.location.pathname === "/login") {
+        // Solo redirige si el usuario está en /login
+        // Detecta el rol y redirige
         const adminDoc = await getDoc(doc(db, "administradores", user.uid));
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-
-        if (adminDoc.exists()) {
-          navigate("/admin-dashboard");
-        } else if (userDoc.exists()) {
-          navigate("/user-dashboard");
+        if (adminDoc.exists() && adminDoc.data().role === "admin") {
+          // Redirige a la última página visitada si existe, si no al dashboard
+          const lastPath = sessionStorage.getItem("lastPath");
+          navigate(lastPath && lastPath !== "/login" ? lastPath : "/admin-dashboard", { replace: true });
+          return;
+        }
+        const clientDoc = await getDoc(doc(db, "clientes", user.uid));
+        if (clientDoc.exists() && clientDoc.data().role === "user") {
+          const lastPath = sessionStorage.getItem("lastPath");
+          navigate(lastPath && lastPath !== "/login" ? lastPath : "/user-dashboard", { replace: true });
+          return;
         }
       }
     });
-
     return () => unsubscribe();
   }, [navigate]);
+
+  // Guardar la última ruta visitada (excepto login y register)
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path !== "/login" && path !== "/register") {
+      sessionStorage.setItem("lastPath", path);
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
