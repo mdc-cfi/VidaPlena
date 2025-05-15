@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './Navbar';
-import { collection, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase.config';
+import { getAuth } from 'firebase/auth';
 
 const MedicamentosList = () => {
   const [medicamentos, setMedicamentos] = useState([]);
@@ -11,12 +12,27 @@ const MedicamentosList = () => {
   useEffect(() => {
     const fetchMedicamentos = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, 'medicamentos'));
-        const medicamentosData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        setMedicamentos(medicamentosData);
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (user) {
+          console.log("Intentando obtener medicamentos para UID:", user.uid);
+          const docRef = doc(db, "medicamentos", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            console.log("Datos obtenidos desde Firestore:", docSnap.data());
+            const medicamentosData = docSnap.data().medicamentos;
+            console.log("Medicamentos obtenidos para el usuario:", medicamentosData);
+            console.log("Medicamentos obtenidos:", medicamentosData);
+            setMedicamentos(medicamentosData);
+          } else {
+            console.warn("No se encontraron medicamentos para este usuario.");
+          }
+        } else {
+          console.warn("No hay un usuario autenticado en MedicamentosList.");
+        }
       } catch (err) {
-        console.error('Error al obtener los medicamentos:', err);
-        setError('No se pudo cargar la información de los medicamentos.');
+        console.error("Error al obtener los medicamentos:", err);
+        setError("No se pudo cargar la información de los medicamentos.");
       } finally {
         setLoading(false);
       }

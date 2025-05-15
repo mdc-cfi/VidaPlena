@@ -29,6 +29,11 @@ const RegisterPage = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
+      // Configurar el displayName del usuario en Firebase Authentication
+      await user.updateProfile({
+        displayName: name,
+      });
+
       // Crear un documento en Firestore para el usuario registrado
       await setDoc(doc(db, "clientes", user.uid), {
         name: name,
@@ -36,6 +41,20 @@ const RegisterPage = () => {
         role: "user", // Rol predeterminado
         verified: true, // Estado de verificación
       });
+
+      // Guardar medicamentos y condiciones médicas en Firestore
+      const medicamentos = [
+        { nombre: "Paracetamol", dosis: "500mg", frecuencia: "Cada 8 horas" },
+        { nombre: "Ibuprofeno", dosis: "200mg", frecuencia: "Cada 12 horas" },
+      ];
+
+      const condicionesMedicas = [
+        { nombre: "Hipertensión", descripcion: "Presión arterial alta" },
+        { nombre: "Diabetes", descripcion: "Nivel alto de azúcar en sangre" },
+      ];
+
+      await setDoc(doc(db, "medicamentos", user.uid), { medicamentos });
+      await setDoc(doc(db, "condicionesMedicas", user.uid), { condicionesMedicas });
 
       setMessage("Registro exitoso. Redirigiendo para completar información adicional...");
       setTimeout(() => {

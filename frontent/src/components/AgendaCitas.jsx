@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import Navbar from "./Navbar";
-import { collection, getDocs, addDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.config";
+import { getAuth } from "firebase/auth";
 
 const AgendaCitas = () => {
   const [formData, setFormData] = useState({
@@ -12,13 +13,57 @@ const AgendaCitas = () => {
     descripcion: "",
   });
   const [citas, setCitas] = useState([]);
+  const [isCliente, setIsCliente] = useState(false);
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      const auth = getAuth();
+      const user = auth.currentUser;
+      console.log("Estado de autenticación del usuario:", user);
+      if (user) {
+        console.log("Usuario autenticado:", user.email);
+        try {
+          const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+          console.log("Intentando obtener el documento del usuario con UID:", user.uid);
+          if (userDoc.exists()) {
+            console.log("Datos del usuario obtenidos desde Firestore:", userDoc.data());
+            const userRole = userDoc.data().rol;
+            console.log("Rol del usuario detectado:", userRole);
+            if (userRole === "cliente") {
+              console.log("El usuario tiene el rol de cliente.");
+              setIsCliente(true);
+            } else {
+              console.warn("El usuario no tiene el rol de cliente. Rol detectado:", userRole);
+            }
+          } else {
+            console.warn("No se encontró el documento del usuario en la base de datos.");
+          }
+        } catch (error) {
+          console.error("Error al verificar el rol del usuario:", error);
+        }
+      } else {
+        console.warn("No hay un usuario autenticado.");
+      }
+    };
+
+    fetchUserRole();
+  }, []);
 
   useEffect(() => {
     const fetchCitas = async () => {
       try {
-        const querySnapshot = await getDocs(collection(db, "citas"));
-        const citasData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        setCitas(citasData);
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (user) {
+          console.log("Obteniendo citas para el usuario con UID:", user.uid);
+          const querySnapshot = await getDocs(collection(db, "citas"));
+          const citasData = querySnapshot.docs
+            .map((doc) => ({ id: doc.id, ...doc.data() }))
+            .filter((cita) => cita.userId === user.uid);
+          setCitas(citasData);
+        } else {
+          console.warn("No hay un usuario autenticado.");
+        }
       } catch (error) {
         console.error("Error al cargar las citas:", error);
       }
@@ -35,16 +80,20 @@ const AgendaCitas = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      // Guardar la cita en Firebase
-      const nuevaCita = { ...formData, fecha: new Date(formData.fecha).toISOString() };
-      const docRef = await addDoc(collection(db, "citas"), nuevaCita);
-      console.log("Cita guardada con ID:", docRef.id);
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (user) {
+        const nuevaCita = { ...formData, fecha: new Date(formData.fecha).toISOString(), userId: user.uid };
+        const docRef = await addDoc(collection(db, "citas"), nuevaCita);
+        console.log("Cita guardada con ID:", docRef.id);
 
-      // Actualizar la lista de citas en el estado
-      setCitas((prev) => [...prev, { id: docRef.id, ...nuevaCita }]);
+        setCitas((prev) => [...prev, { id: docRef.id, ...nuevaCita }]);
 
-      alert("Cita agendada con éxito");
-      setFormData({ nombre: "", apellidos: "", fecha: "", tipo: "", descripcion: "" });
+        alert("Cita agendada con éxito");
+        setFormData({ nombre: "", apellidos: "", fecha: "", tipo: "", descripcion: "" });
+      } else {
+        console.warn("No hay un usuario autenticado para guardar la cita.");
+      }
     } catch (error) {
       console.error("Error al agendar la cita:", error);
       alert("Hubo un error al agendar la cita. Por favor, inténtalo de nuevo.");
@@ -53,10 +102,10 @@ const AgendaCitas = () => {
 
   return (
     <>
-      <Navbar />
+      <Navbar role="cliente" />
       <div className="container mt-5">
         <h1 className="text-center">Agenda de Citas</h1>
-        <p className="text-center">Organiza y visualiza las citas médicas programadas.</p>
+        <p className="text-center">Organiza y visualiza tus citas médicas programadas.</p>
         <form onSubmit={handleSubmit} style={{ maxWidth: "600px", margin: "0 auto" }}>
           <div className="mb-3">
             <label htmlFor="nombre" className="form-label">
@@ -67,7 +116,7 @@ const AgendaCitas = () => {
               id="nombre"
               name="nombre"
               className="form-control"
-              value={formData.nombre}
+              value={formData.nombre || ""}
               onChange={handleChange}
               required
             />
@@ -81,7 +130,7 @@ const AgendaCitas = () => {
               id="apellidos"
               name="apellidos"
               className="form-control"
-              value={formData.apellidos}
+              value={formData.apellidos || ""}
               onChange={handleChange}
               required
             />
@@ -122,8 +171,7 @@ const AgendaCitas = () => {
               id="descripcion"
               name="descripcion"
               className="form-control"
-              rows="3"
-              value={formData.descripcion}
+              value={formData.descripcion || ""}
               onChange={handleChange}
               required
             ></textarea>
@@ -132,14 +180,14 @@ const AgendaCitas = () => {
             Agendar Cita
           </button>
         </form>
-
         <h2 className="text-center mt-5">Citas Programadas</h2>
-        <ul className="list-group mt-3">
+        <ul className="list-group">
           {citas.map((cita) => (
             <li key={cita.id} className="list-group-item">
-              <p><strong>Cliente:</strong> {cita.clienteNombre}</p>
+              <p><strong>Nombre:</strong> {cita.nombre} {cita.apellidos}</p>
               <p><strong>Fecha:</strong> {cita.fecha}</p>
-              <p><strong>Hora:</strong> {cita.hora}</p>
+              <p><strong>Tipo:</strong> {cita.tipo}</p>
+              <p><strong>Descripción:</strong> {cita.descripcion}</p>
             </li>
           ))}
         </ul>

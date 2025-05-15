@@ -57,6 +57,14 @@ const AppRoutes = () => {
           }
         />
         <Route
+          path="/user-dashboard"
+          element={
+            <ProtectedRoute requiredRole="cliente">
+              <AgendaCitas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/clientes"
           element={
             <ProtectedRoute>

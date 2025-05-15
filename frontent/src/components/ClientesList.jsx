@@ -58,9 +58,11 @@ const ClientesList = () => {
       } else {
         console.warn(`No se encontró información para el cliente con ID: ${id}`);
         setCondicionesMedicas((prev) => ({ ...prev, [id]: [] }));
+        alert("No se encontraron datos para este cliente. Por favor, verifica la base de datos.");
       }
     } catch (error) {
-      console.error("Error al obtener las condiciones médicas del cliente:", error);
+      console.error(`Error al obtener datos para el cliente con ID: ${id}`, error);
+      alert("Hubo un error al cargar los datos del cliente. Intenta nuevamente más tarde.");
     }
   };
 

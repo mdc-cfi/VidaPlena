@@ -8,32 +8,36 @@ const CondicionesMedicas = () => {
   const [condiciones, setCondiciones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const auth = getAuth();
-  const user = auth.currentUser;
 
   useEffect(() => {
-    if (!user) {
-      setError('Usuario no válido.');
-      return;
-    }
-
     const fetchCondiciones = async () => {
       try {
-        const userDoc = await getDoc(doc(db, 'clientes', user.uid));
-        if (userDoc.exists()) {
-          setCondiciones(userDoc.data().condicionesMedicas || []);
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (user) {
+          console.log("Intentando obtener condiciones médicas para UID:", user.uid);
+          const docRef = doc(db, "condicionesMedicas", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const condicionesData = docSnap.data().condicionesMedicas;
+            console.log("Condiciones médicas obtenidas:", condicionesData);
+            setCondiciones(condicionesData);
+          } else {
+            console.warn("No se encontraron condiciones médicas para este usuario.");
+          }
         } else {
-          setError('No se encontraron condiciones médicas para este usuario.');
+          console.warn("No hay un usuario autenticado en CondicionesMedicas.");
         }
       } catch (err) {
-        setError('Error al obtener las condiciones médicas: ' + err.message);
+        console.error("Error al obtener las condiciones médicas:", err);
+        setError("No se pudo cargar la información de las condiciones médicas.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchCondiciones();
-  }, [user]);
+  }, []);
 
   if (loading) {
     return (

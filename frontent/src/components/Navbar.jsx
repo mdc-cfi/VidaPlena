@@ -1,13 +1,45 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getAuth, signOut } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase.config"; // Asegúrate de que esta importación sea correcta
 import logo from "../imagenes/logo.png";
 
 function Navbar({ role }) {
   const auth = getAuth();
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
+  const [userName, setUserName] = useState("Usuario");
+
+  useEffect(() => {
+    const fetchUserName = async () => {
+      if (user) {
+        console.log("Usuario autenticado en Navbar:", user);
+        if (user.displayName) {
+          console.log("Nombre del usuario desde displayName:", user.displayName);
+          setUserName(user.displayName);
+        } else {
+          try {
+            console.log("Intentando obtener el nombre del usuario desde Firestore para UID:", user.uid);
+            const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+            if (userDoc.exists()) {
+              console.log("Datos del usuario obtenidos desde Firestore:", userDoc.data());
+              setUserName(userDoc.data().nombre || "Usuario");
+            } else {
+              console.warn("No se encontró el documento del usuario en Firestore.");
+            }
+          } catch (error) {
+            console.error("Error al obtener el nombre del usuario desde Firestore:", error);
+          }
+        }
+      } else {
+        console.warn("No hay un usuario autenticado en Navbar.");
+      }
+    };
+
+    fetchUserName();
+  }, [user]);
 
   useEffect(() => {
     console.log("Rol actualizado en Navbar:", role);
@@ -25,6 +57,9 @@ function Navbar({ role }) {
         console.error("Error al cerrar sesión:", error);
       });
   };
+
+  // Ajustar la lógica para determinar la ruta de "Inicio" según el rol del usuario.
+  const inicioPath = role === "admin" ? "/admin-dashboard" : "/user-dashboard";
 
   return (
     <nav className="navbar navbar-expand-lg" style={{ backgroundColor: '#495057', borderRadius: '10px', width: '90%', margin: '10px auto' }}>
@@ -47,7 +82,7 @@ function Navbar({ role }) {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <Link className="nav-link text-white" to="/admin-dashboard">
+              <Link className="nav-link text-white" to={inicioPath}>
                 Inicio
               </Link>
             </li>
@@ -68,7 +103,7 @@ function Navbar({ role }) {
             {user ? (
               <>
                 <li className="nav-item">
-                  <span className="nav-link text-white">{user.displayName || "Usuario"}</span>
+                  <span className="nav-link text-white">{userName}</span>
                 </li>
                 <li className="nav-item">
                   <button className="nav-link text-white btn btn-link" onClick={handleLogout}>
