@@ -1,7 +1,5 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc } from "firebase/firestore";
 import HomePage from "./components/HomePage";
 import RegisterPage from "./components/RegisterPage";
 import Dashboard from "./components/Dashboard";
@@ -10,40 +8,23 @@ import ClientesList from "./components/ClientesList";
 import AgregarCliente from "./components/AgregarCliente";
 import ProtectedRoute from "./components/ProtectedRoute";
 import LoginPage from "./components/LoginPage";
-import AddClientInfo from "./components/AddClientInfo";
+import AgendaCitas from "./components/AgendaCitas";
 import MedicamentosList from "./components/MedicamentosList";
 import CondicionesMedicas from "./components/CondicionesMedicas";
-import AgendaCitas from "./components/AgendaCitas";
+import Navbar from "./components/Navbar";
 
 const AppRoutes = () => {
-  const auth = getAuth();
-  const db = getFirestore();
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        let userDoc = await getDoc(doc(db, "administradores", user.uid));
-        if (!userDoc.exists()) {
-          userDoc = await getDoc(doc(db, "users", user.uid));
-        }
-      }
-    });
-    return () => unsubscribe();
-  }, [auth, db]);
-
   return (
     <Router>
+      <Navbar />
       <Routes>
-        <Route
-          path="/"
-          element={<HomePage />}
-        />
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route
           path="/admin-dashboard"
           element={
-            <ProtectedRoute requiredRole="admin">
+            <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           }
@@ -51,16 +32,8 @@ const AppRoutes = () => {
         <Route
           path="/user-dashboard"
           element={
-            <ProtectedRoute requiredRole="user">
+            <ProtectedRoute>
               <UserDashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/user-dashboard"
-          element={
-            <ProtectedRoute requiredRole="cliente">
-              <AgendaCitas />
             </ProtectedRoute>
           }
         />
@@ -80,7 +53,14 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         />
-        <Route path="/add-client-info/:userId" element={<AddClientInfo />} />
+        <Route
+          path="/agenda-citas"
+          element={
+            <ProtectedRoute>
+              <AgendaCitas />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/medicamentos"
           element={
@@ -94,14 +74,6 @@ const AppRoutes = () => {
           element={
             <ProtectedRoute>
               <CondicionesMedicas />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/agenda-citas"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <AgendaCitas />
             </ProtectedRoute>
           }
         />

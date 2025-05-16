@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "./Navbar";
 import { collection, getDocs, addDoc, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.config";
 import { getAuth } from "firebase/auth";
@@ -102,7 +101,6 @@ const AgendaCitas = () => {
 
   return (
     <>
-      <Navbar role="cliente" />
       <div className="container mt-5">
         <h1 className="text-center">Agenda de Citas</h1>
         <p className="text-center">Organiza y visualiza tus citas médicas programadas.</p>

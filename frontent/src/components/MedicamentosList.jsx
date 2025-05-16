@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from './Navbar';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase.config';
 import { getAuth } from 'firebase/auth';
@@ -51,7 +50,6 @@ const MedicamentosList = () => {
 
   return (
     <>
-      <Navbar />
       <div className="container mt-5">
         <h1 className="text-center mb-4">Recordatorios de Medicamentos</h1>
         <p className="text-center">Aquí puedes gestionar los medicamentos registrados, agregar nuevos o editar los existentes.</p>

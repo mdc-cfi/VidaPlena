@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.config.js";
-import Navbar from "./Navbar";
 import { getAuth } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 
@@ -44,7 +43,6 @@ const UserDashboard = () => {
 
   return (
     <div>
-      <Navbar />
       <div className="container mt-5">
         <h1 className="text-center mb-4">Bienvenido, {userData.nombreCompleto}</h1>
         <div className="row">

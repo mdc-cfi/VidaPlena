@@ -1,5 +1,4 @@
 import React from 'react';
-import Navbar from "./Navbar";
 import { useNavigate } from 'react-router-dom';
 
 export default function Dashboard() {
@@ -7,7 +6,6 @@ export default function Dashboard() {
 
   return (
     <div>
-      <Navbar />
       <div className="container mt-5">
         <h1 className="text-center mb-4">Bienvenido a VidaPlena</h1>
         <div className="row">
