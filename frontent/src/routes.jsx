@@ -1,5 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "./firebase.config";
 import HomePage from "./components/HomePage";
 import RegisterPage from "./components/RegisterPage";
 import Dashboard from "./components/Dashboard";
@@ -12,11 +15,37 @@ import AgendaCitas from "./components/AgendaCitas";
 import MedicamentosList from "./components/MedicamentosList";
 import CondicionesMedicas from "./components/CondicionesMedicas";
 import Navbar from "./components/Navbar";
+import Perfil from "./components/Perfil";
+import AddClientInfo from "./components/AddClientInfo";
 
 const AppRoutes = () => {
+  const [role, setRole] = useState(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        let userDoc = await getDoc(doc(db, "administradores", user.uid));
+        if (userDoc.exists()) {
+          setRole("admin");
+        } else {
+          userDoc = await getDoc(doc(db, "clientes", user.uid));
+          if (userDoc.exists()) {
+            setRole("user");
+          } else {
+            setRole(null);
+          }
+        }
+      } else {
+        setRole(null);
+      }
+    });
+    return () => unsubscribe();
+  }, []);
+
   return (
     <Router>
-      <Navbar />
+      <Navbar role={role} />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -76,6 +105,18 @@ const AppRoutes = () => {
               <CondicionesMedicas />
             </ProtectedRoute>
           }
+        />
+        <Route
+          path="/perfil"
+          element={
+            <ProtectedRoute>
+              <Perfil />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-client-info/:userId"
+          element={<AddClientInfo />}
         />
       </Routes>
     </Router>

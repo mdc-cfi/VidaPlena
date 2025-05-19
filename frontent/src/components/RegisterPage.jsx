@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../firebase.config"; // Usar la instancia inicializada de Firestore
 import { useNavigate } from "react-router-dom";
@@ -30,7 +30,7 @@ const RegisterPage = () => {
       const user = userCredential.user;
 
       // Configurar el displayName del usuario en Firebase Authentication
-      await user.updateProfile({
+      await updateProfile(user, {
         displayName: name,
       });
 

@@ -13,38 +13,27 @@ const AgendaCitas = () => {
   });
   const [citas, setCitas] = useState([]);
   const [isCliente, setIsCliente] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const fetchUserRole = async () => {
       const auth = getAuth();
       const user = auth.currentUser;
-      console.log("Estado de autenticación del usuario:", user);
       if (user) {
-        console.log("Usuario autenticado:", user.email);
-        try {
-          const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-          console.log("Intentando obtener el documento del usuario con UID:", user.uid);
-          if (userDoc.exists()) {
-            console.log("Datos del usuario obtenidos desde Firestore:", userDoc.data());
-            const userRole = userDoc.data().rol;
-            console.log("Rol del usuario detectado:", userRole);
-            if (userRole === "cliente") {
-              console.log("El usuario tiene el rol de cliente.");
-              setIsCliente(true);
-            } else {
-              console.warn("El usuario no tiene el rol de cliente. Rol detectado:", userRole);
-            }
-          } else {
-            console.warn("No se encontró el documento del usuario en la base de datos.");
-          }
-        } catch (error) {
-          console.error("Error al verificar el rol del usuario:", error);
+        // Buscar en administradores
+        const adminDoc = await getDoc(doc(db, "administradores", user.uid));
+        if (adminDoc.exists()) {
+          setIsAdmin(true);
+          setIsCliente(false);
+          return;
         }
-      } else {
-        console.warn("No hay un usuario autenticado.");
+        // Buscar en usuarios/clientes
+        const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+        if (userDoc.exists() && userDoc.data().rol === "cliente") {
+          setIsCliente(true);
+        }
       }
     };
-
     fetchUserRole();
   }, []);
 
@@ -53,23 +42,18 @@ const AgendaCitas = () => {
       try {
         const auth = getAuth();
         const user = auth.currentUser;
-        if (user) {
-          console.log("Obteniendo citas para el usuario con UID:", user.uid);
-          const querySnapshot = await getDocs(collection(db, "citas"));
-          const citasData = querySnapshot.docs
-            .map((doc) => ({ id: doc.id, ...doc.data() }))
-            .filter((cita) => cita.userId === user.uid);
-          setCitas(citasData);
-        } else {
-          console.warn("No hay un usuario autenticado.");
+        const querySnapshot = await getDocs(collection(db, "citas"));
+        let citasData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+        if (!isAdmin && user) {
+          citasData = citasData.filter((cita) => cita.userId === user.uid);
         }
+        setCitas(citasData);
       } catch (error) {
         console.error("Error al cargar las citas:", error);
       }
     };
-
     fetchCitas();
-  }, []);
+  }, [isAdmin]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -104,80 +88,82 @@ const AgendaCitas = () => {
       <div className="container mt-5">
         <h1 className="text-center">Agenda de Citas</h1>
         <p className="text-center">Organiza y visualiza tus citas médicas programadas.</p>
-        <form onSubmit={handleSubmit} style={{ maxWidth: "600px", margin: "0 auto" }}>
-          <div className="mb-3">
-            <label htmlFor="nombre" className="form-label">
-              Nombre
-            </label>
-            <input
-              type="text"
-              id="nombre"
-              name="nombre"
-              className="form-control"
-              value={formData.nombre || ""}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="apellidos" className="form-label">
-              Apellidos
-            </label>
-            <input
-              type="text"
-              id="apellidos"
-              name="apellidos"
-              className="form-control"
-              value={formData.apellidos || ""}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="fecha" className="form-label">
-              Fecha
-            </label>
-            <input
-              type="date"
-              id="fecha"
-              name="fecha"
-              className="form-control"
-              value={formData.fecha}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="tipo" className="form-label">
-              Tipo de Cita
-            </label>
-            <input
-              type="text"
-              id="tipo"
-              name="tipo"
-              className="form-control"
-              value={formData.tipo}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="mb-3">
-            <label htmlFor="descripcion" className="form-label">
-              Descripción
-            </label>
-            <textarea
-              id="descripcion"
-              name="descripcion"
-              className="form-control"
-              value={formData.descripcion || ""}
-              onChange={handleChange}
-              required
-            ></textarea>
-          </div>
-          <button type="submit" className="btn btn-primary w-100">
-            Agendar Cita
-          </button>
-        </form>
+        {(!isAdmin) && (
+          <form onSubmit={handleSubmit} style={{ maxWidth: "600px", margin: "0 auto" }}>
+            <div className="mb-3">
+              <label htmlFor="nombre" className="form-label">
+                Nombre
+              </label>
+              <input
+                type="text"
+                id="nombre"
+                name="nombre"
+                className="form-control"
+                value={formData.nombre || ""}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="apellidos" className="form-label">
+                Apellidos
+              </label>
+              <input
+                type="text"
+                id="apellidos"
+                name="apellidos"
+                className="form-control"
+                value={formData.apellidos || ""}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="fecha" className="form-label">
+                Fecha
+              </label>
+              <input
+                type="date"
+                id="fecha"
+                name="fecha"
+                className="form-control"
+                value={formData.fecha}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="tipo" className="form-label">
+                Tipo de Cita
+              </label>
+              <input
+                type="text"
+                id="tipo"
+                name="tipo"
+                className="form-control"
+                value={formData.tipo}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="mb-3">
+              <label htmlFor="descripcion" className="form-label">
+                Descripción
+              </label>
+              <textarea
+                id="descripcion"
+                name="descripcion"
+                className="form-control"
+                value={formData.descripcion || ""}
+                onChange={handleChange}
+                required
+              ></textarea>
+            </div>
+            <button type="submit" className="btn btn-primary w-100">
+              Agendar Cita
+            </button>
+          </form>
+        )}
         <h2 className="text-center mt-5">Citas Programadas</h2>
         <ul className="list-group">
           {citas.map((cita) => (

@@ -86,26 +86,7 @@ const AddClientInfo = () => {
     try {
       await setDoc(doc(db, "clientes", userId), cliente, { merge: true });
       alert("Información guardada exitosamente.");
-
-      const auth = getAuth();
-      const user = auth.currentUser;
-      if (user) {
-        const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-        if (userDoc.exists()) {
-          const userRole = userDoc.data().rol;
-          if (userRole === "admin") {
-            navigate("/admin-dashboard");
-          } else {
-            navigate("/user-dashboard");
-          }
-        } else {
-          console.warn("No se encontró el documento del usuario en Firestore.");
-          navigate("/");
-        }
-      } else {
-        console.warn("No hay un usuario autenticado.");
-        navigate("/");
-      }
+      navigate("/user-dashboard");
     } catch (error) {
       console.error("Error al guardar la información: ", error);
       alert("Hubo un error al guardar la información.");
