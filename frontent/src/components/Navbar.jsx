@@ -69,12 +69,12 @@ function Navbar({ role }) {
   // Ajustar la lógica para determinar la ruta de "Inicio" según el rol del usuario.
   let inicioPath = "/";
   if (role === "admin") inicioPath = "/admin-dashboard";
-  else if (role === "user") inicioPath = "/user-dashboard";
+  else if (role === "cliente") inicioPath = "/user-dashboard";
 
   return (
     <nav className="navbar navbar-expand-lg" style={{ backgroundColor: '#495057', borderRadius: '10px', width: '90%', margin: '10px auto' }}>
       <div className="container">
-        <Link className="navbar-brand text-white" to={role === "admin" ? "/admin-dashboard" : role === "user" ? "/user-dashboard" : "/"} style={{ display: "flex", alignItems: "center" }}>
+        <Link className="navbar-brand text-white" to={role === "admin" ? "/admin-dashboard" : role === "cliente" ? "/user-dashboard" : "/"} style={{ display: "flex", alignItems: "center" }}>
           <img src={logo} alt="Logo Vida Plena" style={{ width: "50px", height: "50px", marginRight: "10px" }} />
           VidaPlena
         </Link>

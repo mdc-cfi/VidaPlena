@@ -31,7 +31,7 @@ const AppRoutes = () => {
         } else {
           userDoc = await getDoc(doc(db, "clientes", user.uid));
           if (userDoc.exists()) {
-            setRole("user");
+            setRole("cliente"); // Cambiado de "user" a "cliente" para unificación
           } else {
             setRole(null);
           }

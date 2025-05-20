@@ -47,6 +47,16 @@ const AgendaCitas = () => {
         if (!isAdmin && user) {
           citasData = citasData.filter((cita) => cita.userId === user.uid);
         }
+        // Filtrar solo las citas cuya fecha es posterior a hoy
+        const hoy = new Date();
+        hoy.setHours(0,0,0,0);
+        citasData = citasData.filter((cita) => {
+          if (!cita.fecha) return false;
+          const fechaCita = new Date(cita.fecha);
+          fechaCita.setHours(0,0,0,0);
+          // Solo mostrar si la cita es después de hoy
+          return fechaCita > hoy;
+        });
         setCitas(citasData);
       } catch (error) {
         console.error("Error al cargar las citas:", error);
@@ -165,16 +175,20 @@ const AgendaCitas = () => {
           </form>
         )}
         <h2 className="text-center mt-5">Citas Programadas</h2>
-        <ul className="list-group">
-          {citas.map((cita) => (
-            <li key={cita.id} className="list-group-item">
-              <p><strong>Nombre:</strong> {cita.nombre} {cita.apellidos}</p>
-              <p><strong>Fecha:</strong> {cita.fecha}</p>
-              <p><strong>Tipo:</strong> {cita.tipo}</p>
-              <p><strong>Descripción:</strong> {cita.descripcion}</p>
-            </li>
-          ))}
-        </ul>
+        {citas.length === 0 ? (
+          <p className="text-center">No tienes citas futuras programadas.</p>
+        ) : (
+          <ul className="list-group">
+            {citas.map((cita) => (
+              <li key={cita.id} className="list-group-item">
+                <p><strong>Nombre:</strong> {cita.nombre} {cita.apellidos}</p>
+                <p><strong>Fecha:</strong> {cita.fecha}</p>
+                <p><strong>Tipo:</strong> {cita.tipo}</p>
+                <p><strong>Descripción:</strong> {cita.descripcion}</p>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </>
   );
