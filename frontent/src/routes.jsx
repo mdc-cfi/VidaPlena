@@ -18,6 +18,11 @@ import Navbar from "./components/Navbar";
 import Perfil from "./components/Perfil";
 import AddClientInfo from "./components/AddClientInfo";
 
+// ROUTES: Define todas las rutas principales de la app y protege el acceso según el rol.
+// - Usa ProtectedRoute para que solo usuarios autenticados accedan a rutas sensibles.
+// - Redirige a dashboards y vistas según el tipo de usuario (admin o cliente).
+// - Integra todos los componentes principales: Dashboard, UserDashboard, AgendaCitas, Medicamentos, Perfil, etc.
+
 const AppRoutes = () => {
   const [role, setRole] = useState(null);
 

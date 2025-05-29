@@ -6,6 +6,12 @@ import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.config"; // Asegúrate de que esta importación sea correcta
 import logo from "../imagenes/logo.png";
 
+// NAVBAR: Barra de navegación principal que muestra el logo, nombre, menú y enlaces según el rol del usuario.
+// - Muestra el nombre y rol del usuario.
+// - El botón "Inicio" y el logo redirigen al dashboard correcto según el rol (admin o cliente).
+// - Permite cerrar sesión y acceder al perfil.
+// - El menú se adapta para escritorio y móvil.
+
 function Navbar({ role }) {
   const auth = getAuth();
   const [user] = useAuthState(auth);

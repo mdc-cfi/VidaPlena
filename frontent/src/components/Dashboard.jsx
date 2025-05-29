@@ -1,6 +1,10 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// DASHBOARD: Vista principal para administradores.
+// - Muestra accesos rápidos a gestión de clientes, medicamentos y agenda de citas.
+// - Permite navegar fácilmente a las secciones clave del sistema.
+
 export default function Dashboard() {
   const navigate = useNavigate();
 

@@ -1,3 +1,8 @@
+// USER DASHBOARD: Vista principal para clientes.
+// - Muestra información personalizada del usuario.
+// - Accesos rápidos a condiciones médicas, medicamentos y agenda de citas.
+// - Permite navegar a las secciones más usadas por el cliente.
+
 import React, { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.config.js";
