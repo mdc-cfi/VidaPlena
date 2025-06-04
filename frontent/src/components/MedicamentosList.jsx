@@ -287,14 +287,106 @@ const MedicamentosList = () => {
     window.location.reload();
   };
 
+  // --- NOTIFICACIONES DE MEDICACIÓN ---
+  useEffect(() => {
+    if (!('Notification' in window)) return;
+    if (!medicamentos || medicamentos.length === 0) return;
+    // Solo para clientes (no admin)
+    if (isAdmin) return;
+
+    // Solicitar permiso si no está concedido
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    // Limpiar timers previos
+    let timers = [];
+
+    // Función para programar notificaciones
+    function programarNotificaciones() {
+      const hoy = new Date();
+      const diasSemana = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+      const diaActual = diasSemana[hoy.getDay()];
+      medicamentos.forEach((med) => {
+        // Normalizar días
+        let dias = [];
+        if (Array.isArray(med.dias)) {
+          dias = med.dias.map(d => d.normalize('NFD').replace(/\u0300-\u036f/g, '').toLowerCase());
+        } else if (typeof med.dias === 'string') {
+          dias = med.dias.split(/,|;/).map(d => d.trim().normalize('NFD').replace(/\u0300-\u036f/g, '').toLowerCase());
+        }
+        const diaActualNorm = diaActual.normalize('NFD').replace(/\u0300-\u036f/g, '').toLowerCase();
+        if (dias.length > 0 && !dias.includes(diaActualNorm)) return;
+        // Calcular horas de toma
+        let frecuencia = Number(med.frecuencia);
+        if (!frecuencia || isNaN(frecuencia) || frecuencia < 1) frecuencia = 1;
+        const baseHora = med.hora || '07:00';
+        const [h, m] = baseHora.split(":").map(Number);
+        const intervalo = Math.floor(24 / frecuencia);
+        for (let i = 0; i < frecuencia; i++) {
+          let hora = (h + i * intervalo) % 24;
+          let minutos = m;
+          // Calcular fecha/hora de la toma de hoy
+          const toma = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), hora, minutos, 0, 0);
+          // 5 minutos antes
+          const antes = new Date(toma.getTime() - 5 * 60000);
+          // Si la hora aún no pasó, programar notificación
+          if (antes > hoy) {
+            const ms = antes.getTime() - hoy.getTime();
+            timers.push(setTimeout(() => {
+              if (Notification.permission === 'granted') {
+                new Notification(`Recuerda: en 5 minutos debes tomar ${med.nombre} (${med.dosis})`);
+              }
+            }, ms));
+          }
+          if (toma > hoy) {
+            const ms2 = toma.getTime() - hoy.getTime();
+            timers.push(setTimeout(() => {
+              if (Notification.permission === 'granted') {
+                new Notification(`¡Es hora de tomar ${med.nombre} (${med.dosis})!`);
+              }
+            }, ms2));
+          }
+        }
+      });
+    }
+    programarNotificaciones();
+    // Limpiar timers al desmontar
+    return () => { timers.forEach(t => clearTimeout(t)); };
+  }, [medicamentos, isAdmin]);
+
   if (loading) {
     return <p>Cargando medicamentos...</p>;
   }
+  // Botón de prueba de notificación (solo visible para clientes)
+  const handleTestNotification = () => {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('¡Esto es una notificación de prueba de VidaPlena!');
+    } else if ('Notification' in window && Notification.permission !== 'denied') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          new Notification('¡Esto es una notificación de prueba de VidaPlena!');
+        } else {
+          alert('Debes permitir las notificaciones para recibir avisos.');
+        }
+      });
+    } else {
+      alert('Las notificaciones no están soportadas en este navegador.');
+    }
+  };
   return (
     <>
       <div className="container mt-5">
         <h1 className="text-center mb-4">Recordatorios de Medicamentos</h1>
         <p className="text-center">Aquí puedes gestionar los medicamentos registrados, agregar nuevos o editar los existentes.</p>
+        {/* Botón de prueba de notificación */}
+        {!isAdmin && (
+          <div className="text-center mb-3">
+            <button className="btn btn-info" onClick={handleTestNotification}>
+              Probar notificación ahora
+            </button>
+          </div>
+        )}
         {/* EXPEDIENTES HISTÓRICOS SOLO LECTURA */}
         {expedientes.length > 0 && (
           <div className="mb-4">
