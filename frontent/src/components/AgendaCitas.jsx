@@ -12,30 +12,37 @@ const AgendaCitas = () => {
     descripcion: "",
   });
   const [citas, setCitas] = useState([]);
-  const [isCliente, setIsCliente] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [clientes, setClientes] = useState([]);
+  const [selectedCliente, setSelectedCliente] = useState("");
 
   useEffect(() => {
     const fetchUserRole = async () => {
       const auth = getAuth();
       const user = auth.currentUser;
       if (user) {
+        setIsAuthenticated(true);
         // Buscar en administradores
         const adminDoc = await getDoc(doc(db, "administradores", user.uid));
         if (adminDoc.exists()) {
           setIsAdmin(true);
-          setIsCliente(false);
-          return;
-        }
-        // Buscar en usuarios/clientes
-        const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-        if (userDoc.exists() && userDoc.data().rol === "cliente") {
-          setIsCliente(true);
         }
       }
     };
     fetchUserRole();
   }, []);
+
+  useEffect(() => {
+    // Si es admin, obtener la lista de clientes
+    const fetchClientes = async () => {
+      if (isAdmin) {
+        const querySnapshot = await getDocs(collection(db, "clientes"));
+        setClientes(querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+      }
+    };
+    fetchClientes();
+  }, [isAdmin]);
 
   useEffect(() => {
     const fetchCitas = async () => {
@@ -75,17 +82,20 @@ const AgendaCitas = () => {
     try {
       const auth = getAuth();
       const user = auth.currentUser;
-      if (user) {
-        const nuevaCita = { ...formData, fecha: new Date(formData.fecha).toISOString(), userId: user.uid };
+      let userId = user ? user.uid : null;
+      if (isAdmin) {
+        userId = selectedCliente;
+      }
+      if (userId) {
+        const nuevaCita = { ...formData, fecha: new Date(formData.fecha).toISOString(), userId };
         const docRef = await addDoc(collection(db, "citas"), nuevaCita);
         console.log("Cita guardada con ID:", docRef.id);
-
         setCitas((prev) => [...prev, { id: docRef.id, ...nuevaCita }]);
-
         alert("Cita agendada con éxito");
         setFormData({ nombre: "", apellidos: "", fecha: "", tipo: "", descripcion: "" });
+        if (isAdmin) setSelectedCliente("");
       } else {
-        console.warn("No hay un usuario autenticado para guardar la cita.");
+        console.warn("No hay un usuario autenticado o seleccionado para guardar la cita.");
       }
     } catch (error) {
       console.error("Error al agendar la cita:", error);
@@ -98,8 +108,25 @@ const AgendaCitas = () => {
       <div className="container mt-5">
         <h1 className="text-center">Agenda de Citas</h1>
         <p className="text-center">Organiza y visualiza tus citas médicas programadas.</p>
-        {(!isAdmin) && (
+        {isAuthenticated && (
           <form onSubmit={handleSubmit} style={{ maxWidth: "600px", margin: "0 auto" }}>
+            {isAdmin && (
+              <div className="mb-3">
+                <label htmlFor="cliente" className="form-label">Seleccionar Cliente</label>
+                <select
+                  id="cliente"
+                  className="form-control"
+                  value={selectedCliente}
+                  onChange={e => setSelectedCliente(e.target.value)}
+                  required
+                >
+                  <option value="">Selecciona un cliente</option>
+                  {clientes.map(cliente => (
+                    <option key={cliente.id} value={cliente.id}>{cliente.nombre}</option>
+                  ))}
+                </select>
+              </div>
+            )}
             <div className="mb-3">
               <label htmlFor="nombre" className="form-label">
                 Nombre

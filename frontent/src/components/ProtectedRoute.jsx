@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.config";
 
 const ProtectedRoute = ({ children, requiredRoles = [] }) => {
+  const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
-  const auth = getAuth();
-  const user = auth.currentUser;
 
   useEffect(() => {
-    const fetchUserRole = async () => {
-      if (user) {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      setUser(firebaseUser);
+      if (firebaseUser) {
         try {
-          const adminDoc = await getDoc(doc(db, "administradores", user.uid));
+          const adminDoc = await getDoc(doc(db, "administradores", firebaseUser.uid));
           if (adminDoc.exists()) {
             setUserRole("admin");
           } else {
-            const clientDoc = await getDoc(doc(db, "clientes", user.uid));
+            const clientDoc = await getDoc(doc(db, "clientes", firebaseUser.uid));
             if (clientDoc.exists()) {
               setUserRole(clientDoc.data().role || "user");
             }
@@ -31,10 +32,9 @@ const ProtectedRoute = ({ children, requiredRoles = [] }) => {
       } else {
         setLoading(false);
       }
-    };
-
-    fetchUserRole();
-  }, [user]);
+    });
+    return () => unsubscribe();
+  }, []);
 
   if (loading) {
     return <p>Cargando...</p>;

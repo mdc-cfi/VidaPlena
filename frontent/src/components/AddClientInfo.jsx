@@ -89,7 +89,7 @@ const AddClientInfo = () => {
       navigate("/user-dashboard");
     } catch (error) {
       console.error("Error al guardar la información: ", error);
-      alert("Hubo un error al guardar la información.");
+      alert("Error al guardar la información.");
     }
   };
 

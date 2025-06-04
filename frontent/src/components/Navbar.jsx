@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { getAuth, signOut } from "firebase/auth";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase.config"; // Asegúrate de que esta importación sea correcta
+import { db } from "../firebase.config";
 import logo from "../imagenes/logo.png";
 
 function Navbar({ role }) {
@@ -11,7 +11,6 @@ function Navbar({ role }) {
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
   const [userName, setUserName] = useState("Usuario");
-  const [showProfile, setShowProfile] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   useEffect(() => {

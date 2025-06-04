@@ -6,7 +6,9 @@ import { getAuth } from 'firebase/auth';
 const MedicamentosList = () => {
   const [medicamentos, setMedicamentos] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [editIndex, setEditIndex] = useState(null);
+  const [editMed, setEditMed] = useState({});
 
   useEffect(() => {
     const fetchMedicamentos = async () => {
@@ -17,6 +19,7 @@ const MedicamentosList = () => {
           // Verificar si es admin
           const adminDoc = await getDoc(doc(db, "administradores", user.uid));
           if (adminDoc.exists()) {
+            setIsAdmin(true);
             // ADMIN: obtener todos los medicamentos de todos los clientes
             let allMeds = [];
             // 1. Leer de la colección 'medicamentos'
@@ -37,7 +40,7 @@ const MedicamentosList = () => {
             for (const clienteDoc of clientesSnapshot.docs) {
               const clienteData = clienteDoc.data();
               const recordatorios = clienteData.recordatoriosMedicamentos || [];
-              recordatorios.forEach((med, idx) => {
+              recordatorios.forEach((med) => {
                 allMeds.push({
                   nombre: med.nombreMedicamento || med.nombre || "(Sin nombre)",
                   dosis: med.dosis || "-",
@@ -79,24 +82,65 @@ const MedicamentosList = () => {
         } else {
           setMedicamentos([]);
         }
-      } catch (err) {
-        setError("No se pudo cargar la información de los medicamentos.");
+
       } finally {
         setLoading(false);
       }
+    
     };
 
     fetchMedicamentos();
   }, []);
 
+  const handleEditClick = (idx) => {
+    setEditIndex(idx);
+    setEditMed(medicamentos[idx]);
+  };
+
+  const handleEditChange = (e) => {
+    const { name, value } = e.target;
+    setEditMed((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditSave = async (medicamento) => {
+    // Buscar el cliente por nombre
+    const clientesSnapshot = await getDocs(collection(db, "clientes"));
+    const cliente = clientesSnapshot.docs.find(docu => (docu.data().nombre === medicamento.clienteNombre));
+    if (cliente) {
+      // Actualizar el medicamento en el array
+      const recordatorios = cliente.data().recordatoriosMedicamentos || [];
+      const idx = recordatorios.findIndex(med => med.nombreMedicamento === medicamento.nombre);
+      if (idx !== -1) {
+        recordatorios[idx] = {
+          nombreMedicamento: editMed.nombre,
+          dosis: editMed.dosis,
+          frecuencia: editMed.frecuencia
+        };
+        await doc(db, "clientes", cliente.id).update({ recordatoriosMedicamentos: recordatorios });
+      }
+    }
+    setEditIndex(null);
+    setEditMed({});
+    // Refrescar lista
+    window.location.reload();
+  };
+
+  const handleDelete = async (medicamento) => {
+    // Buscar el cliente por nombre
+    const clientesSnapshot = await getDocs(collection(db, "clientes"));
+    const cliente = clientesSnapshot.docs.find(docu => (docu.data().nombre === medicamento.clienteNombre));
+    if (cliente) {
+      let recordatorios = cliente.data().recordatoriosMedicamentos || [];
+      recordatorios = recordatorios.filter(med => med.nombreMedicamento !== medicamento.nombre);
+      await doc(db, "clientes", cliente.id).update({ recordatoriosMedicamentos: recordatorios });
+    }
+    // Refrescar lista
+    window.location.reload();
+  };
+
   if (loading) {
     return <p>Cargando medicamentos...</p>;
   }
-
-  if (error) {
-    return <p>{error}</p>;
-  }
-
   return (
     <>
       <div className="container mt-5">
@@ -105,9 +149,27 @@ const MedicamentosList = () => {
         <ul className="list-group">
           {medicamentos.map((medicamento, idx) => (
             <li key={medicamento.id || medicamento.nombre + idx} className="list-group-item">
-              <strong>{medicamento.nombre}</strong> - {medicamento.dosis} - {medicamento.frecuencia}
-              {medicamento.clienteNombre && (
-                <><br /><em>Cliente:</em> {medicamento.clienteNombre}</>
+              {isAdmin && editIndex === idx ? (
+                <>
+                  <input name="nombre" value={editMed.nombre} onChange={handleEditChange} /> -
+                  <input name="dosis" value={editMed.dosis} onChange={handleEditChange} /> -
+                  <input name="frecuencia" value={editMed.frecuencia} onChange={handleEditChange} />
+                  <button className="guardar" onClick={() => handleEditSave(medicamento)}>Guardar</button>
+                  <button className="cancelar" onClick={() => setEditIndex(null)}>Cancelar</button>
+                </>
+              ) : (
+                <>
+                  <strong>{medicamento.nombre}</strong> - {medicamento.dosis} - {medicamento.frecuencia}
+                  {medicamento.clienteNombre && (
+                    <><br /><em>Cliente:</em> {medicamento.clienteNombre}</>
+                  )}
+                  {isAdmin && (
+                    <>
+                      <button className="btn btn-warning btn-sm ms-2" onClick={() => handleEditClick(idx)}>Editar</button>
+                      <button className="btn btn-danger btn-sm ms-2" onClick={() => handleDelete(medicamento)}>Eliminar</button>
+                    </>
+                  )}
+                </>
               )}
             </li>
           ))}

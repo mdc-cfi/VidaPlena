@@ -86,8 +86,7 @@ const AgregarCliente = () => {
       !cliente.direccion ||
       !cliente.telefono ||
       !cliente.contactoEmergencia.nombre ||
-      !cliente.contactoEmergencia.telefono ||
-      !cliente.historialMedico.condiciones
+      !cliente.contactoEmergencia.telefono
     ) {
       setMensaje("Por favor, rellena todos los campos obligatorios marcados con *.");
       return;
@@ -170,8 +169,8 @@ const AgregarCliente = () => {
 
         {/* Columna 2 */}
         <div style={colStyle}>
-          <label style={labelStyle}>Condiciones médicas (separadas por coma) *</label>
-          <input style={inputStyle} type="text" name="historialMedico.condiciones" placeholder="Ej: Diabetes, Hipertensión" value={cliente.historialMedico.condiciones} onChange={handleChange} required />
+          <label style={labelStyle}>Condiciones médicas (separadas por coma) </label>
+          <input style={inputStyle} type="text" name="historialMedico.condiciones" placeholder="Ej: Diabetes, Hipertensión" value={cliente.historialMedico.condiciones} onChange={handleChange} />
 
           <label style={labelStyle}>Notas médicas</label>
           <input style={inputStyle} type="text" name="historialMedico.notas" placeholder="Notas adicionales" value={cliente.historialMedico.notas} onChange={handleChange} />
