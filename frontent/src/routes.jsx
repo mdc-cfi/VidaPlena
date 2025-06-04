@@ -17,6 +17,7 @@ import CondicionesMedicas from "./components/CondicionesMedicas";
 import Navbar from "./components/Navbar";
 import Perfil from "./components/Perfil";
 import AddClientInfo from "./components/AddClientInfo";
+import InformeCliente from "./components/InformeCliente";
 
 const AppRoutes = () => {
   const [role, setRole] = useState(null);
@@ -117,6 +118,14 @@ const AppRoutes = () => {
         <Route
           path="/add-client-info/:userId"
           element={<AddClientInfo />}
+        />
+        <Route
+          path="/informe-cliente"
+          element={
+            <ProtectedRoute>
+              <InformeCliente />
+            </ProtectedRoute>
+          }
         />
       </Routes>
     </Router>
