@@ -1,38 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { getAuth } from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.config";
 
-const ProtectedRoute = ({ children, requiredRole }) => {
-  const [userRole, setUserRole] = useState(() => sessionStorage.getItem("userRole"));
+const ProtectedRoute = ({ children, requiredRoles = [] }) => {
+  const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isAuthReady, setIsAuthReady] = useState(false);
-  const auth = getAuth();
-  const [user, setUser] = useState(auth.currentUser);
 
-  // Escuchar cambios de autenticación de forma reactiva
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((firebaseUser) => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser);
-      setIsAuthReady(true);
-    });
-    return () => unsubscribe();
-  }, [auth]);
-
-  useEffect(() => {
-    const fetchUserRole = async () => {
-      if (user && !userRole) {
+      if (firebaseUser) {
         try {
-          const adminDoc = await getDoc(doc(db, "administradores", user.uid));
+          const adminDoc = await getDoc(doc(db, "administradores", firebaseUser.uid));
           if (adminDoc.exists()) {
             setUserRole("admin");
             sessionStorage.setItem("userRole", "admin");
           } else {
-            const clientDoc = await getDoc(doc(db, "clientes", user.uid));
+            const clientDoc = await getDoc(doc(db, "clientes", firebaseUser.uid));
             if (clientDoc.exists()) {
-              setUserRole(clientDoc.data().role);
-              sessionStorage.setItem("userRole", clientDoc.data().role);
+              setUserRole(clientDoc.data().role || "user");
             }
           }
         } catch (error) {
@@ -43,12 +33,11 @@ const ProtectedRoute = ({ children, requiredRole }) => {
       } else {
         setLoading(false);
       }
-    };
-    if (isAuthReady && !userRole) fetchUserRole();
-    if (isAuthReady && userRole) setLoading(false);
-  }, [user, isAuthReady, userRole]);
+    });
+    return () => unsubscribe();
+  }, []);
 
-  if (loading || !isAuthReady) {
+  if (loading) {
     return <p>Cargando...</p>;
   }
 
@@ -58,8 +47,8 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (requiredRole && userRole !== requiredRole) {
-    console.error(`Acceso denegado: el usuario no tiene el rol requerido (${requiredRole}).`);
+  if (requiredRoles.length > 0 && !requiredRoles.includes(userRole)) {
+    console.error(`Acceso denegado: el usuario no tiene un rol permitido (${requiredRoles.join(", ")}).`);
     return <Navigate to="/" replace />;
   }
 

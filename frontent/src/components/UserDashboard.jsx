@@ -47,7 +47,6 @@ const UserDashboard = () => {
 
   return (
     <div>
-      {/* Contenedor principal del dashboard de usuario */}
       <div className="container mt-5">
         {/* Título de bienvenida personalizado */}
         <h1 className="text-center mb-4">Bienvenido, {userData.nombreCompleto}</h1>
@@ -92,6 +91,34 @@ const UserDashboard = () => {
                 <button
                   className="btn btn-primary mt-3"
                   onClick={() => navigate('/medicamentos')}
+                >
+                  Ver más
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-6 col-lg-4 mb-4">
+            <div className="card">
+              <div className="card-body">
+                <h5 className="card-title">Agendar Citas</h5>
+                <p>En esta sección puedes programar y gestionar tus citas médicas.</p>
+                <button
+                  className="btn btn-primary mt-3"
+                  onClick={() => navigate('/agenda-citas')}
+                >
+                  Ver más
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="col-md-6 col-lg-4 mb-4">
+            <div className="card">
+              <div className="card-body">
+                <h5 className="card-title">Informes del cliente</h5>
+                <p>En esta sección puedes escribir y guardar cualquier información o notas personales que desees.</p>
+                <button
+                  className="btn btn-primary mt-3"
+                  onClick={() => navigate('/informe-cliente')}
                 >
                   Ver más
                 </button>

@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase.config";
+import { getAuth } from "firebase/auth";
 
 const AddClientInfo = () => {
   const { userId } = useParams();
@@ -85,10 +86,10 @@ const AddClientInfo = () => {
     try {
       await setDoc(doc(db, "clientes", userId), cliente, { merge: true });
       alert("Información guardada exitosamente.");
-      navigate("/dashboard");
+      navigate("/user-dashboard");
     } catch (error) {
       console.error("Error al guardar la información: ", error);
-      alert("Hubo un error al guardar la información.");
+      alert("Error al guardar la información.");
     }
   };
 

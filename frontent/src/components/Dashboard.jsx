@@ -7,7 +7,6 @@ export default function Dashboard() {
 
   return (
     <div>
-      {/* Contenedor principal del dashboard */}
       <div className="container mt-5">
         {/* Título de bienvenida */}
         <h1 className="text-center mb-4">Bienvenido a VidaPlena</h1>
@@ -40,8 +39,7 @@ export default function Dashboard() {
               <div className="card-body">
                 <h5 className="card-title">Agenda de Citas</h5>
                 <p className="card-text">Organiza y visualiza las citas médicas programadas.</p>
-                {/* Botón para futuras funcionalidades */}
-                <button className="btn btn-primary">Ver más</button>
+                <button className="btn btn-primary" onClick={() => navigate('/agenda-citas')}>Ver más</button>
               </div>
             </div>
           </div>
