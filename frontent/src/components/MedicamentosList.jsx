@@ -305,17 +305,17 @@ const MedicamentosList = () => {
     // Función para programar notificaciones
     function programarNotificaciones() {
       const hoy = new Date();
-      const diasSemana = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+      const diasSemana = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
       const diaActual = diasSemana[hoy.getDay()];
       medicamentos.forEach((med) => {
-        // Normalizar días
+        // Normalizar días (sin acentos y minúsculas)
         let dias = [];
         if (Array.isArray(med.dias)) {
-          dias = med.dias.map(d => d.normalize('NFD').replace(/\u0300-\u036f/g, '').toLowerCase());
+          dias = med.dias.map(d => d.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase());
         } else if (typeof med.dias === 'string') {
-          dias = med.dias.split(/,|;/).map(d => d.trim().normalize('NFD').replace(/\u0300-\u036f/g, '').toLowerCase());
+          dias = med.dias.split(/,|;/).map(d => d.trim().normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase());
         }
-        const diaActualNorm = diaActual.normalize('NFD').replace(/\u0300-\u036f/g, '').toLowerCase();
+        const diaActualNorm = diaActual.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
         if (dias.length > 0 && !dias.includes(diaActualNorm)) return;
         // Calcular horas de toma
         let frecuencia = Number(med.frecuencia);
@@ -330,20 +330,23 @@ const MedicamentosList = () => {
           const toma = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), hora, minutos, 0, 0);
           // 5 minutos antes
           const antes = new Date(toma.getTime() - 5 * 60000);
-          // Si la hora aún no pasó, programar notificación
+          // Usar nombreMedicamento si existe, si no nombre
+          const nombreMed = med.nombreMedicamento || med.nombre || '(Sin nombre)';
+          // Si la hora aún no pasó, programar notificación 5 min antes
           if (antes > hoy) {
             const ms = antes.getTime() - hoy.getTime();
             timers.push(setTimeout(() => {
               if (Notification.permission === 'granted') {
-                new Notification(`Recuerda: en 5 minutos debes tomar ${med.nombre} (${med.dosis})`);
+                new Notification(`Recuerda: en 5 minutos debes tomar ${nombreMed} (${med.dosis})`);
               }
             }, ms));
           }
+          // Notificación justo a la hora
           if (toma > hoy) {
             const ms2 = toma.getTime() - hoy.getTime();
             timers.push(setTimeout(() => {
               if (Notification.permission === 'granted') {
-                new Notification(`¡Es hora de tomar ${med.nombre} (${med.dosis})!`);
+                new Notification(`¡Es hora de tomar ${nombreMed} (${med.dosis})!`);
               }
             }, ms2));
           }
